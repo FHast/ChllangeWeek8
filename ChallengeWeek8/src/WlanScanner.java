@@ -15,19 +15,19 @@ public class WlanScanner {
 	public static int port = 2548;
 	
 	//The ip address of the machine the Wlan scanner server is running on. (Default = 127.0.0.1 , your own machine)
-	public static String targetIP = "127.0.0.1";
+	public static String targetIP = "130.89.180.198";
 	
 	//Location of the receive script for position on the website
 	public static String webSenderTarget = "130.89.13.124";
 	
 	//Your group name on the website, don't forget to change this!
-	public static String name = "HÄÄÄÄ?";
+	public static String name = "Hier könnte ihre Werbung stehen.";
 	
 	//Controls if the position is send to the server for viewing on the website.
 	public static boolean sendToWebsite = true;
 	
 	//The LocationFinder that is to be used. Replace this with your own implementation!
-	public LocationFinder locationHandler = new  SimpleLocationFinder();
+	public LocationFinder locationHandler = new  TrilaterationLocationFinder();
 	
 	///////////// Do not edit below this line! ////////////////
 	
