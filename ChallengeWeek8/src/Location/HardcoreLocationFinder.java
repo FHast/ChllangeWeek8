@@ -48,10 +48,6 @@ public class HardcoreLocationFinder implements LocationFinder {
 			}
 			totalSSI += 100 + signals.get(s);
 		}
-		// make totalSSI positive
-		if (totalSSI < 0) {
-			totalSSI = totalSSI;
-		}
 		// print result
 		System.out.println("Strongest Signal from: " + bestAP + " with: " + max);
 		// get strongest AP position
@@ -60,13 +56,11 @@ public class HardcoreLocationFinder implements LocationFinder {
 		myLoc = bestAPloc;
 		// take other AP into account
 		
-		
-		myLoc = new Position(0, 0);
 		for (String s : signals.keySet()) {
-			if (!s.equals(bestAP)) {
+			if (!s.equals(bestAP + "s")) {
 				System.out.println("Adding influence for: " + s);
 
-				double ssi = 100 + signals.get(s);
+				double ssi = 80 + signals.get(s);
 				double weight = (ssi / totalSSI);
 
 				System.out.println(
