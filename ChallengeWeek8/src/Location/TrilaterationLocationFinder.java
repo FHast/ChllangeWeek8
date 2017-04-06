@@ -13,7 +13,7 @@ public class TrilaterationLocationFinder implements LocationFinder {
 	private HashMap<String, Integer> signals;
 	private Position lastloc = new Position(0, 0);
 
-	private static final int difflimit = 10;
+	private static final double difflimit = 10.0;
 	private static final double factor = 0.5;
 
 	public TrilaterationLocationFinder() {
@@ -38,17 +38,21 @@ public class TrilaterationLocationFinder implements LocationFinder {
 		// get the 3 best MacRssiPairs
 		ArrayList<MacRssiPair> bestNodes = new ArrayList<>();
 
-		for (int i = 0; i < data.length; i++) {
+		for (int j = 0; j < 3; j++) {
 			double max = -100;
-			String mac = data[i].getMacAsString();
-			if (knownLocations.containsKey(mac) && !bestNodes.contains(data[i]) && signals.get(mac) > max) {
-				max = signals.get(mac);
-				bestNodes.add(data[i]);
+			MacRssiPair best = null;
+			for (MacRssiPair m : data) {
+				String mac = m.getMacAsString();
+				if (knownLocations.containsKey(mac) && !bestNodes.contains(m) && signals.get(mac) > max) {
+					max = signals.get(mac);
+					best = m;
+				}
 			}
+			bestNodes.add(best);
 		}
 		System.out.println(bestNodes.toString());
 
-		if (bestNodes.size() == 3) {
+		if (!bestNodes.contains(null)) {
 			Position newloc = trilaterate(bestNodes.toArray(new MacRssiPair[3]));
 			System.out.println(newloc.toString());
 			double Xdiff = newloc.getX() - lastloc.getX();
@@ -56,12 +60,15 @@ public class TrilaterationLocationFinder implements LocationFinder {
 			if (((Xdiff <= difflimit && Xdiff >= (-1 * difflimit)) || lastloc.getX() == 0)
 					&& ((Ydiff <= difflimit && Ydiff >= (-1 * difflimit)) || lastloc.getY() == 0)) {
 				lastloc = newloc;
+				System.out.println("normal");
 				return newloc;
 			} else {
+				System.out.println("alternate");
+				lastloc = new Position(lastloc.getX() + (factor * Xdiff), lastloc.getY() + (factor * Ydiff));
 				return lastloc;
-				//return new Position(lastloc.getX() + factor * Xdiff, lastloc.getY() + factor * Ydiff);
 			}
 		}
+		System.out.println("failure");
 		return lastloc;
 	}
 
@@ -103,11 +110,11 @@ public class TrilaterationLocationFinder implements LocationFinder {
 		P3[1] = knownLocations.get(data[2].getMacAsString()).getY();
 
 		// DISTANCE BETWEEN POINT 1 AND MY LOCATION
-		double distance1 = signals.get(data[0].getMacAsString()) - 100;
+		double distance1 = signals.get(data[0].getMacAsString()) * -1;
 		// DISTANCE BETWEEN POINT 2 AND MY LOCATION
-		double distance2 = signals.get(data[1].getMacAsString()) - 100;
+		double distance2 = signals.get(data[1].getMacAsString()) * -1;
 		// DISTANCE BETWEEN POINT 3 AND MY LOCATION
-		double distance3 = signals.get(data[2].getMacAsString()) - 100;
+		double distance3 = signals.get(data[2].getMacAsString()) * -1;
 
 		for (int i = 0; i < P1.length; i++) {
 			t1 = P2[i];
@@ -174,11 +181,5 @@ public class TrilaterationLocationFinder implements LocationFinder {
 		}
 
 		return new Position(triptx, tripty);
-	}
-
-	private void printMacs(MacRssiPair[] data) {
-		for (MacRssiPair pair : data) {
-			System.out.println(pair);
-		}
 	}
 }

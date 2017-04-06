@@ -10,8 +10,10 @@ public class HardcoreLocationFinder implements LocationFinder {
 
 	private HashMap<String, Position> knownLocations;
 	private HashMap<String, Integer> signals;
+	private HashMap<String, Double> distances;
 
 	public HardcoreLocationFinder() {
+		distances = new HashMap<>();
 		knownLocations = Utils.getKnownLocations();
 		// remove other rooms aps
 		knownLocations.remove("64:D9:89:43:CF:E0");
@@ -28,6 +30,11 @@ public class HardcoreLocationFinder implements LocationFinder {
 	}
 
 	private Position getPosition(MacRssiPair[] data) {
+		for (MacRssiPair m : data) {
+			double distance = Math.pow(10, (m.getRssi()+42)/22.5);
+			distances.put(m.getMacAsString(), distance);
+		}
+		
 		Position myLoc = new Position(0, 0);
 		// Fill Signal Hashmap.
 		for (int i = 0; i < data.length; i++) {
@@ -56,11 +63,12 @@ public class HardcoreLocationFinder implements LocationFinder {
 		myLoc = bestAPloc;
 		// take other AP into account
 		
+		System.out.println(myLoc);
 		for (String s : signals.keySet()) {
-			if (!s.equals(bestAP + "s")) {
+			if (!s.equals(bestAP)) {
 				System.out.println("Adding influence for: " + s);
 
-				double ssi = 80 + signals.get(s);
+				double ssi = 100 + signals.get(s);
 				double weight = (ssi / totalSSI);
 
 				System.out.println(
